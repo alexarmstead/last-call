@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Last Call">
+<meta name="theme-color" content="#0E2D2A">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-512.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Last Call Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: one narrow phone column — tonight's tab up top, the pour buttons, then the rollup and the tab history. */
+:root{
+  --bg:#E6F4F1; --surface:#FFFFFF; --surface-2:#D3ECE7; --ink:#0E2D2A; --muted:#4D6D69; --line:#BCDAD4;
+  --accent:#FF4A69; --accent-ink:#FFFFFF; --lemon:#FFC53A;
+  --c-vodka:#21AFC4; --c-white:#D6B13F; --c-red:#9E2248; --c-196:#FF7F36; --c-surf:#B8702A; --c-ipa:#C2860F;
+  --warn:#D9531E; --good:#1F9C6E;
+  --display:"Bungee", "Arial Black", Impact, system-ui, sans-serif;
+  --body:"Figtree", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r:18px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C1B1A; --surface:#132826; --surface-2:#1B3532; --ink:#E4F3F0; --muted:#92B2AD; --line:#29453F;
+  --accent:#FF6A84; --accent-ink:#1A0A0E; --lemon:#FFD25E;
+  --c-vodka:#46CDE0; --c-white:#E7C85E; --c-red:#D9567D; --c-196:#FF9A5C; --c-surf:#DB9450; --c-ipa:#F0B43F;
+  --warn:#FF8A5B; --good:#4CCB9A; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0C1B1A; --surface:#132826; --surface-2:#1B3532; --ink:#E4F3F0; --muted:#92B2AD; --line:#29453F;
+  --accent:#FF6A84; --accent-ink:#1A0A0E; --lemon:#FFD25E;
+  --c-vodka:#46CDE0; --c-white:#E7C85E; --c-red:#D9567D; --c-196:#FF9A5C; --c-surf:#DB9450; --c-ipa:#F0B43F;
+  --warn:#FF8A5B; --good:#4CCB9A; color-scheme:dark;
+}
+/* Alternate looks, chosen in Settings. "Soda" (above) follows the phone's light/dark mode; these are fixed. */
+html:root[data-scheme="speakeasy"]{
+  --bg:#0F1714; --surface:#18231E; --surface-2:#21302A; --ink:#F1E6CF; --muted:#A9A089; --line:#2F3F37;
+  --accent:#D9A441; --accent-ink:#1A1306; --lemon:#E9C766;
+  --c-vodka:#6FC3B2; --c-white:#E2CF7A; --c-red:#D25A6E; --c-196:#E98B4E; --c-surf:#C99A5B; --c-ipa:#E0A93B;
+  --warn:#FF8A5B; --good:#7FD3A5; color-scheme:dark;
+}
+html:root[data-scheme="neon"]{
+  --bg:#120F24; --surface:#1B1733; --surface-2:#262046; --ink:#F3EEFF; --muted:#A59CC8; --line:#352E5C;
+  --accent:#FF3EA5; --accent-ink:#1A0412; --lemon:#FFE45C;
+  --c-vodka:#3DE3F5; --c-white:#F6E27A; --c-red:#FF5C8A; --c-196:#FF9548; --c-surf:#FFB05C; --c-ipa:#FFC94A;
+  --warn:#FF7A59; --good:#5CF0B0; color-scheme:dark;
+}
+html:root[data-scheme="rose"]{
+  --bg:#FBE8E6; --surface:#FFFFFF; --surface-2:#F5D3D0; --ink:#3A1020; --muted:#85525E; --line:#EBC1BE;
+  --accent:#E0405E; --accent-ink:#FFFFFF; --lemon:#F2B33D;
+  --c-vodka:#2A9DB0; --c-white:#C99F2E; --c-red:#8E1F45; --c-196:#F0702E; --c-surf:#A8642A; --c-ipa:#B87A0E;
+  --warn:#C9451A; --good:#23865F; color-scheme:light;
+}
+html:root[data-scheme="citrus"]{
+  --bg:#FFF4C2; --surface:#FFFDF2; --surface-2:#FBE48A; --ink:#1B2A4A; --muted:#5A6585; --line:#F0D872;
+  --accent:#FF6A13; --accent-ink:#FFFFFF; --lemon:#FFB800;
+  --c-vodka:#1E9FD0; --c-white:#C8A21A; --c-red:#B0274F; --c-196:#F0532D; --c-surf:#A86B23; --c-ipa:#C48300;
+  --warn:#D8401C; --good:#1F8F5C; color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+.app{max-width:480px;margin:0 auto;padding-inline:16px;padding-block:calc(14px + env(safe-area-inset-top,0px)) calc(48px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:22px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+h2{font-family:var(--display);font-weight:400;font-size:17px;letter-spacing:.02em;margin:0;text-wrap:balance}
+.label{font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mark{font-family:var(--display);font-size:26px;line-height:1;letter-spacing:.01em;display:flex;align-items:center;gap:8px}
+.mark span{color:var(--accent)}
+.top-r{display:flex;align-items:center;gap:8px}
+.pill{font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:99px;background:var(--surface-2);color:var(--muted);white-space:nowrap}
+.pill.ok{color:var(--good)}
+.icon-btn{width:38px;height:38px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);display:grid;place-items:center}
+.icon-btn svg{width:20px;height:20px}
+
+/* tonight */
+.tonight{position:relative;overflow:hidden;border-radius:26px;background:var(--ink);color:var(--bg);padding:20px 20px 18px;display:flex;flex-direction:column;gap:12px}
+.tonight .label{color:color-mix(in oklab,var(--bg) 70%,transparent)}
+.big{display:flex;align-items:baseline;gap:8px;position:relative;z-index:1}
+.big b{font-family:var(--display);font-weight:400;font-size:58px;line-height:.9}
+.big small{font-weight:700;font-size:15px;opacity:.8}
+.t-row{display:flex;flex-wrap:wrap;gap:8px;position:relative;z-index:1}
+.chip{font-size:13px;font-weight:600;padding:6px 11px;border-radius:99px;background:color-mix(in oklab,var(--bg) 14%,transparent);white-space:nowrap}
+.chip.hot{background:var(--accent);color:var(--accent-ink)}
+.equiv{font-size:13.5px;opacity:.85;position:relative;z-index:1;max-width:36ch}
+.bubbles{position:absolute;inset:0;pointer-events:none}
+.bubbles i{position:absolute;bottom:-20px;border-radius:50%;border:2px solid color-mix(in oklab,var(--bg) 35%,transparent);animation:rise linear infinite}
+@keyframes rise{from{transform:translateY(0)}to{transform:translateY(-260px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.bubbles i{animation:none;opacity:.5;bottom:20%}}
+
+/* pour */
+.sec-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.when{font-size:13px;font-weight:600;color:var(--muted);background:none;border:0;padding:4px 0;text-decoration:underline dotted;text-underline-offset:3px}
+.when.past{color:var(--accent)}
+.when-box{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.when-box input{padding:8px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);min-width:0;flex:1}
+.ghost{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 12px;font-weight:600;font-size:13px}
+.pours{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.drink{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.drink.wide{grid-column:1/-1}
+.d-head{display:flex;gap:10px;align-items:center;min-width:0}
+.d-head svg{width:34px;height:40px;flex:none}
+.d-name{font-weight:800;font-size:15px;line-height:1.15}
+.d-sub{font-size:12px;color:var(--muted)}
+.opts{display:flex;gap:8px}
+.pour{flex:1;min-width:0;border:0;border-radius:13px;padding:10px 8px;background:var(--surface-2);text-align:left;display:flex;flex-direction:column;gap:1px;transition:transform .12s}
+.pour:active{transform:scale(.95)}
+.pour b{font-size:14.5px}
+.pour span{font-size:11.5px;color:var(--muted)}
+.pour .k{font-weight:700;color:var(--ink);font-size:12px}
+.drink[data-t="vodka"] .pour{background:color-mix(in oklab,var(--c-vodka) 18%,var(--surface))}
+.drink[data-t="white"] .pour{background:color-mix(in oklab,var(--c-white) 22%,var(--surface))}
+.drink[data-t="red"] .pour{background:color-mix(in oklab,var(--c-red) 16%,var(--surface))}
+.drink[data-t="neg196"] .pour{background:color-mix(in oklab,var(--c-196) 18%,var(--surface))}
+.drink[data-t="surf"] .pour{background:color-mix(in oklab,var(--c-surf) 18%,var(--surface))}
+.drink[data-t="ginger"] .pour{background:color-mix(in oklab,var(--lemon) 26%,var(--surface))}
+.drink[data-t="ipa"] .pour{background:color-mix(in oklab,var(--c-ipa) 20%,var(--surface))}
+
+/* rollup */
+.seg{display:flex;background:var(--surface-2);border-radius:14px;padding:4px;gap:4px}
+.seg button{flex:1;border:0;background:none;border-radius:10px;padding:8px 4px;font-weight:700;font-size:13.5px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgb(0 0 0/.12)}
+.pnav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0 10px}
+.pnav h3{margin:0;font-size:17px;font-weight:800;text-align:center;flex:1}
+.pnav button{width:36px;height:36px;border-radius:11px;border:1.5px solid var(--line);background:var(--surface);font-weight:800;font-size:16px}
+.pnav button:disabled{opacity:.3;cursor:default}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat b{font-size:20px;font-weight:800;line-height:1.1}
+.stat span{font-size:11.5px;color:var(--muted);font-weight:600}
+.stat.flag b{color:var(--warn)}
+.note{font-size:13px;color:var(--muted);margin:10px 2px 0}
+.note b{color:var(--ink)}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:14px}
+.chart-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.mini-seg{display:flex;gap:4px}
+.mini-seg button{border:1.5px solid var(--line);background:none;border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700;color:var(--muted)}
+.mini-seg button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chart-wrap{overflow-x:auto}
+.chart-wrap svg{display:block;width:100%;height:auto}
+.legend{font-size:11.5px;color:var(--muted);margin-top:6px;display:flex;gap:12px;flex-wrap:wrap}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--warn);margin-right:5px;vertical-align:1px}
+.mix{display:flex;flex-direction:column;gap:9px;margin-top:4px}
+.mix-row{display:grid;grid-template-columns:96px 1fr auto;gap:10px;align-items:center;font-size:13px}
+.mix-row .bar{height:12px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.mix-row .bar i{display:block;height:100%;border-radius:99px}
+.mix-row .v{font-weight:700;white-space:nowrap}
+
+/* log */
+.night{margin-top:12px}
+.night:first-child{margin-top:0}
+.night-h{display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;color:var(--muted);padding:0 2px 6px;border-bottom:1.5px dashed var(--line)}
+.entry{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line)}
+.entry .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.entry .e-main{flex:1;min-width:0}
+.entry .e-main b{font-weight:700}
+.entry .e-main span{font-size:12px;color:var(--muted);margin-left:6px}
+.entry .e-k{font-weight:700;font-size:13.5px;white-space:nowrap}
+.del{border:0;background:none;color:var(--muted);width:30px;height:30px;border-radius:9px;font-size:16px}
+.del.armed{background:var(--warn);color:#fff;width:auto;padding:0 10px;font-size:12px;font-weight:700}
+.empty{text-align:center;color:var(--muted);padding:22px 8px;font-size:14px}
+.empty b{display:block;font-family:var(--display);font-weight:400;font-size:20px;color:var(--ink);margin-bottom:4px}
+
+/* settings sheet */
+.sheet-bg{position:fixed;inset:0;background:rgb(0 0 0/.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:480px;border-radius:24px 24px 0 0;padding:20px 16px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;max-height:90%;overflow:auto}
+.field-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.field{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:var(--muted);min-width:0}
+.field input,.field select{padding:10px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;font-size:15px;min-width:0;width:100%}
+.ref{font-size:12.5px;color:var(--muted);line-height:1.5}
+.ref table{width:100%;border-collapse:collapse;margin-top:6px}
+.ref td{padding:5px 0;border-bottom:1px solid var(--line)}
+.ref td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.schemes{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.scheme{border:2px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:7px;text-align:left;min-width:0}
+.scheme[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+.scheme b{font-size:13.5px}
+.scheme small{font-size:11px;opacity:.75}
+.sw{display:flex;gap:4px}
+.sw i{width:18px;height:18px;border-radius:50%;border:1.5px solid rgb(127 127 127/.35)}
+.primary{border:0;border-radius:14px;padding:12px;background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:15px}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);border-radius:16px;padding:10px 10px 10px 16px;display:flex;align-items:center;gap:12px;font-weight:600;font-size:14px;z-index:30;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgb(0 0 0/.25)}
+.toast button{border:0;background:var(--accent);color:var(--accent-ink);border-radius:10px;padding:6px 12px;font-weight:800;font-size:13px}
+.pop{animation:pop .35s ease}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.pop{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="mark" aria-label="Last Call">LAST<span>CALL</span></div>
+    <div class="top-r">
+      <span class="pill" id="sync">Loading…</span>
+      <button class="icon-btn" id="openSettings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="tonight" id="tonight" aria-live="polite">
+    <div class="bubbles" aria-hidden="true" id="bubbles"></div>
+    <div class="label" id="tonightLabel">Tonight's tab</div>
+    <div class="big"><b class="num" id="tKcal">0</b><small>kcal</small></div>
+    <div class="t-row" id="tChips"></div>
+    <div class="equiv" id="tEquiv"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Pour one</h2>
+      <button class="when" id="whenBtn">Logging: now</button>
+    </div>
+    <div class="when-box" id="whenBox" hidden>
+      <input type="datetime-local" id="whenInput" aria-label="When was this drink?">
+      <button class="ghost" id="whenNow">Back to now</button>
+    </div>
+    <div class="pours" id="pours"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>The rollup</h2></div>
+    <div class="seg" role="group" aria-label="Period" id="viewSeg">
+      <button data-v="week" aria-pressed="true">Week</button>
+      <button data-v="month" aria-pressed="false">Month</button>
+      <button data-v="year" aria-pressed="false">Year</button>
+      <button data-v="all" aria-pressed="false">All</button>
+    </div>
+    <div class="pnav">
+      <button id="prev" aria-label="Previous period">‹</button>
+      <h3 id="pLabel">This week</h3>
+      <button id="next" aria-label="Next period">›</button>
+    </div>
+    <div class="stats" id="stats"></div>
+    <p class="note" id="pNote"></p>
+    <div class="card" style="margin-top:12px">
+      <div class="chart-top">
+        <span class="label" id="chartLabel">Calories by night</span>
+        <div class="mini-seg" role="group" aria-label="Chart metric" id="metricSeg">
+          <button data-m="kcal" aria-pressed="true">kcal</button>
+          <button data-m="std" aria-pressed="false">std drinks</button>
+        </div>
+      </div>
+      <div class="chart-wrap" id="chart"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <span class="label">What you drank</span>
+      <div class="mix" id="mix"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>The tab</h2><span class="label" id="logCount"></span></div>
+    <div class="card" id="log"></div>
+  </section>
+</div>
+
+<div class="sheet-bg" id="sheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+    <h2>Pick a look</h2>
+    <div class="schemes" id="schemes" role="group" aria-label="Color scheme"></div>
+    <h2 id="setTitle">You &amp; the math</h2>
+    <div class="field-row">
+      <label class="field">Height (in)<input id="sHeight" type="number" inputmode="decimal" min="48" max="96"></label>
+      <label class="field">Weight (lb)<input id="sWeight" type="number" inputmode="decimal" min="80" max="400"></label>
+      <label class="field">Age<input id="sAge" type="number" inputmode="numeric" min="21" max="100"></label>
+    </div>
+    <label class="field">Activity
+      <select id="sAct">
+        <option value="1.2">Mostly sitting</option>
+        <option value="1.375">Light exercise 1–3×/week</option>
+        <option value="1.55">Moderate exercise 3–5×/week</option>
+        <option value="1.725">Hard exercise 6–7×/week</option>
+      </select>
+    </label>
+    <div class="ref" id="tdeeOut"></div>
+    <div class="ref">
+      <b>How each pour is counted.</b> A standard drink is 0.6 oz of pure alcohol (one 1.5 oz shot of 80-proof vodka, or 5 oz of 12% wine). Nights run until 4 am, so a 1 am nightcap counts toward the evening before.
+      <table id="refTable"></table>
+    </div>
+    <h2>Backup</h2>
+    <div class="ref">Your drinks are saved on this phone only. Export a backup now and then (save it to Files or iCloud Drive), and use Import to restore it on a new phone.</div>
+    <div class="ref" id="backupInfo"></div>
+    <div style="display:flex;gap:8px">
+      <button class="ghost" id="exportBtn" style="flex:1">Export backup</button>
+      <button class="ghost" id="importBtn" style="flex:1">Import backup</button>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+    </div>
+    <button class="primary" id="closeSettings">Done</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden><span id="toastMsg"></span><button id="toastUndo">Undo</button></div>
+
+<script>
+(() => {
+  const CUTOFF = 4 * 3600e3; // nights end at 4am
+  const ICONS = {
+    highball:c=>`<svg viewBox="0 0 34 40" aria-hidden="true"><path d="M7 4h20l-2.5 32h-15z" fill="color-mix(in oklab,${c} 25%,transparent)" stroke="${c}" stroke-width="2.2" stroke-linejoin="round"/><circle cx="14" cy="26" r="1.8" fill="${c}"/><circle cx="19" cy="19" r="1.4" fill="${c}"/><circle cx="16" cy="12" r="1.1" fill="${c}"/><path d="M21 1l3 8" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+    wine:c=>`<svg viewBox="0 0 34 40" aria-hidden="true"><path d="M8 3h18c0 9-3 15-9 15S8 12 8 3z" fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round"/><path d="M9.3 9h15.4c-.8 4.5-3.4 7-7.7 7s-6.9-2.5-7.7-7z" fill="${c}"/><path d="M17 18v14M10 36h14" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+    pint:c=>`<svg viewBox="0 0 34 40" aria-hidden="true"><path d="M7 6h20l-2 31H9z" fill="color-mix(in oklab,${c} 30%,transparent)" stroke="${c}" stroke-width="2.2" stroke-linejoin="round"/><path d="M7.4 12h19.2l-1.7 25H9.1z" fill="${c}"/><path d="M6 7c0-4 4-5 6-3 2-3 7-3 9 0 3-2 7 0 7 3" fill="none" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+    can:c=>`<svg viewBox="0 0 34 40" aria-hidden="true"><rect x="8" y="5" width="18" height="32" rx="4" fill="color-mix(in oklab,${c} 25%,transparent)" stroke="${c}" stroke-width="2.2"/><path d="M10 5l2-2h10l2 2" fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round"/><path d="M8 14h18M8 28h18" stroke="${c}" stroke-width="2"/></svg>`
+  };
+  // kcal & standard-drink math per pour
+  const DRINKS = {
+    vodka:{name:'Vodka soda',sub:"Tito's + soda water",icon:'highball',color:'var(--c-vodka)',wide:true,
+      opts:{short:{label:'Short',detail:'2 shots',kcal:194,std:2},tall:{label:'Tall',detail:'4 shots',kcal:388,std:4}}},
+    ginger:{name:'Vodka ginger',sub:"Tito's + ginger ale",icon:'highball',color:'var(--lemon)',wide:true,
+      opts:{short:{label:'Short',detail:'2 shots + ~4 oz',kcal:241,std:2},tall:{label:'Tall',detail:'4 shots + ~6 oz',kcal:458,std:4}}},    white:{name:'White wine',sub:'~12% ABV',icon:'wine',color:'var(--c-white)',
+      opts:{glass:{label:'Glass',detail:'5 oz',kcal:121,std:1},big:{label:'Big pour',detail:'8 oz',kcal:194,std:1.6}}},
+    red:{name:'Red wine',sub:'~13% ABV',icon:'wine',color:'var(--c-red)',
+      opts:{glass:{label:'Glass',detail:'5 oz',kcal:125,std:1.1},big:{label:'Big pour',detail:'8 oz',kcal:200,std:1.7}}},
+    ipa:{name:'IPA',sub:'~6.5% ABV',icon:'pint',color:'var(--c-ipa)',wide:true,
+      opts:{oz12:{label:'12 oz',detail:'bottle or can',kcal:200,std:1.3},oz16:{label:'16 oz',detail:'pint or tallboy',kcal:265,std:1.7}}},
+    neg196:{name:'-196',sub:'12 oz · 6%',icon:'can',color:'var(--c-196)',
+      opts:{can:{label:'Can',detail:'12 oz',kcal:136,std:1.2}}},
+    surf:{name:'Surfside',sub:'12 oz · 4.5%',icon:'can',color:'var(--c-surf)',
+      opts:{can:{label:'Can',detail:'12 oz',kcal:100,std:0.9}}}
+  };
+  const DEFAULTS = {height:71,weight:155,age:36,act:1.375,scheme:'soda'};
+  // preview swatches: background, card, accent, a drink color
+  const SCHEMES = {
+    soda:{name:'Soda',note:'Mint & grapefruit · follows light/dark',sw:['#E6F4F1','#0E2D2A','#FF4A69','#21AFC4']},
+    speakeasy:{name:'Speakeasy',note:'Bottle green & brass',sw:['#0F1714','#F1E6CF','#D9A441','#6FC3B2']},
+    neon:{name:'Neon Dive',note:'Midnight & hot pink',sw:['#120F24','#F3EEFF','#FF3EA5','#3DE3F5']},
+    rose:{name:'Rosé Hour',note:'Blush & burgundy',sw:['#FBE8E6','#3A1020','#E0405E','#2A9DB0']},
+    citrus:{name:'Citrus Pop',note:'Lemon & tangerine',sw:['#FFF4C2','#1B2A4A','#FF6A13','#1E9FD0']}
+  };
+  function applyScheme(){
+    const s = SCHEMES[S.settings.scheme] ? S.settings.scheme : 'soda';
+    if (s==='soda') document.documentElement.removeAttribute('data-scheme');
+    else document.documentElement.setAttribute('data-scheme', s);
+    document.querySelectorAll('#schemes .scheme').forEach(b=>b.setAttribute('aria-pressed', b.dataset.s===s));
+  }
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const fmt = n => Math.round(n).toLocaleString();
+  const fmt1 = n => (Math.round(n*10)/10).toLocaleString(undefined,{maximumFractionDigits:1});
+  const pad = n => String(n).padStart(2,'0');
+  const keyOfDate = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const keyOf = ts => keyOfDate(new Date(ts - CUTOFF));
+  const dateFromKey = k => { const [y,m,d]=k.split('-').map(Number); return new Date(y,m-1,d); };
+  const addDays = (d,n) => new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
+  const tonightDate = () => dateFromKey(keyOf(Date.now()));
+  const DOW = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  // ---------- storage ----------
+  const ls = {
+    get(k){try{return JSON.parse(localStorage.getItem(k))}catch{return null}},
+    set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+  };
+  const S = { mode:'pending', col:null, entries:new Map(), settings:{...DEFAULTS},
+    view:'week', offset:0, metric:'kcal', when:null };
+  const cache = ls.get('lc_cache');
+  if (cache) { (cache.entries||[]).forEach(e=>S.entries.set(e.id,e)); Object.assign(S.settings, cache.settings||{}); }
+
+  function persistLocal(){
+    const payload = {entries:[...S.entries.values()], settings:S.settings};
+    ls.set(S.mode==='db' ? 'lc_cache' : 'lc_local', payload);
+  }
+  function setSync(text, ok){ const p=$('sync'); p.textContent=text; p.classList.toggle('ok',!!ok); }
+
+  function goLocal(){
+    S.mode='local';
+    S.entries.clear();
+    const loc = ls.get('lc_local');
+    if (loc){ (loc.entries||[]).forEach(e=>S.entries.set(e.id,e)); Object.assign(S.settings, loc.settings||{}); }
+    else if (cache){ (cache.entries||[]).forEach(e=>S.entries.set(e.id,e)); }
+    setSync('On this phone', true);
+    render();
+  }
+
+  async function addEntry(type,opt){
+    const d = DRINKS[type], o = d.opts[opt];
+    const ts = S.when ? S.when : Date.now();
+    const id = 'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    const e = {id,type,opt,kcal:o.kcal,std:o.std,ts,label:`${d.name}${Object.keys(d.opts).length>1?' · '+o.label:''}`};
+    S.entries.set(id,e); persistLocal(); render();
+    $('tKcal').classList.remove('pop'); void $('tKcal').offsetWidth; $('tKcal').classList.add('pop');
+    toast(`${e.label} · +${o.kcal} kcal`, id);
+    if (S.mode==='db'){ try{ await S.col.doc(id).set({type,opt,kcal:o.kcal,std:o.std,ts,label:e.label,kind:'drink'}); }
+      catch(err){ toast(err && err.code==='quota_exceeded' ? 'Storage is full. Delete old entries to log more.' : 'Couldn’t save that pour. Check your connection and try again.'); S.entries.delete(id); render(); } }
+  }
+  async function removeEntry(id){
+    S.entries.delete(id); persistLocal(); render();
+    if (S.mode==='db'){ try{ await S.col.doc(id).delete(); }catch{ toast('Couldn’t delete. Try again when you’re online.'); } }
+  }
+  let setTimer=null;
+  function saveSettings(){
+    persistLocal(); render(); renderTdee();
+    if (S.mode!=='db') return;
+    clearTimeout(setTimer);
+    setTimer=setTimeout(async()=>{ try{ await S.col.doc('settings').set({kind:'settings',...S.settings}); }catch{} },700);
+  }
+
+  // ---------- body math ----------
+  function tdee(){
+    const s=S.settings, kg=s.weight*0.4536, cm=s.height*2.54;
+    const bmr = 10*kg + 6.25*cm - 5*s.age + 5; // Mifflin-St Jeor, male
+    return {bmr, tdee:bmr*s.act};
+  }
+  function runMin(kcal){ const kg=S.settings.weight*0.4536; return kcal/(11.8*3.5*kg/200); } // 7.5 mph run (8-min mile), MET 11.8
+  function equiv(kcal){
+    if (!kcal) return '';
+    const pz = kcal/285, rm = runMin(kcal);
+    return `About ${fmt1(pz)} slice${Math.abs(pz-1)<.05?'':'s'} of pizza, or ${fmt(rm)} minutes of running at your 8-minute-mile pace.`;
+  }
+
+  // ---------- periods ----------
+  function period(){
+    const t = tonightDate(), o=S.offset;
+    if (S.view==='week'){
+      const start = addDays(t, -((t.getDay()+6)%7) + 7*o), end = addDays(start,7);
+      const label = o===0?'This week':o===-1?'Last week':`${MON[start.getMonth()]} ${start.getDate()} – ${MON[addDays(end,-1).getMonth()]} ${addDays(end,-1).getDate()}`;
+      return {start,end,label,unit:'day',buckets:[...Array(7)].map((_,i)=>({from:addDays(start,i),to:addDays(start,i+1),tick:DOW[i]}))};
+    }
+    if (S.view==='month'){
+      const start = new Date(t.getFullYear(), t.getMonth()+o, 1), end = new Date(start.getFullYear(), start.getMonth()+1, 1);
+      const n = Math.round((end-start)/864e5);
+      return {start,end,unit:'day',label:o===0?'This month':`${MON[start.getMonth()]} ${start.getFullYear()}`,
+        buckets:[...Array(n)].map((_,i)=>({from:addDays(start,i),to:addDays(start,i+1),tick:(i===0||(i+1)%5===0)?String(i+1):''}))};
+    }
+    if (S.view==='year'){
+      const y=t.getFullYear()+o, start=new Date(y,0,1), end=new Date(y+1,0,1);
+      return {start,end,unit:'month',label:o===0?`${y} so far`:String(y),
+        buckets:[...Array(12)].map((_,i)=>({from:new Date(y,i,1),to:new Date(y,i+1,1),tick:MON[i][0]}))};
+    }
+    // all time, by month
+    const all=[...S.entries.values()];
+    const first = all.length ? dateFromKey(keyOf(Math.min(...all.map(e=>e.ts)))) : t;
+    const start=new Date(first.getFullYear(),first.getMonth(),1), end=new Date(t.getFullYear(),t.getMonth()+1,1);
+    const buckets=[]; for(let d=new Date(start); d<end; d=new Date(d.getFullYear(),d.getMonth()+1,1)){
+      buckets.push({from:d,to:new Date(d.getFullYear(),d.getMonth()+1,1),tick:d.getMonth()===0||buckets.length===0?`${MON[d.getMonth()]} '${String(d.getFullYear()).slice(2)}`:MON[d.getMonth()][0]});
+    }
+    return {start,end,unit:'month',label:'All time',buckets};
+  }
+
+  // Tracking began Oct 10, 2026 (or earlier, if a drink was backdated before that).
+  // Nights before then aren't counted as dry.
+  function trackStart(){
+    let s=dateFromKey('2026-10-10');
+    S.entries.forEach(e=>{const d=dateFromKey(keyOf(e.ts)); if(d<s) s=d;});
+    return s;
+  }
+  function aggregate(p){
+    const t=tonightDate(), ts0=trackStart();
+    const inP=[...S.entries.values()].filter(e=>{const d=dateFromKey(keyOf(e.ts)); return d>=p.start && d<p.end;});
+    const nights=new Map();
+    inP.forEach(e=>{const k=keyOf(e.ts); const n=nights.get(k)||{kcal:0,std:0,n:0}; n.kcal+=e.kcal;n.std+=e.std;n.n++; nights.set(k,n);});
+    p.buckets.forEach(b=>{b.kcal=0;b.std=0;b.peak=false;b.isNow=t>=b.from&&t<b.to;b.future=b.from>t||b.to<=ts0;});
+    inP.forEach(e=>{const d=dateFromKey(keyOf(e.ts)); const b=p.buckets.find(b=>d>=b.from&&d<b.to); if(b){b.kcal+=e.kcal;b.std+=e.std;}});
+    if (p.unit==='day') p.buckets.forEach(b=>{b.peak=b.std>4.05;});
+    const lastDay = t<p.end ? addDays(t,1) : p.end;
+    const from = p.start > ts0 ? p.start : ts0;
+    const elapsed = Math.max(0, Math.round((lastDay - from)/864e5));
+    // tracked days inside each bucket, for the % of daily calories view
+    p.buckets.forEach(b=>{const a0=b.from>ts0?b.from:ts0, a1=b.to<lastDay?b.to:lastDay; b.days=Math.max(0,Math.round((a1-a0)/864e5));});
+    const kcal=inP.reduce((s,e)=>s+e.kcal,0), std=inP.reduce((s,e)=>s+e.std,0);
+    const heavy=[...nights.values()].filter(n=>n.std>4.05).length;
+    const byType={}; inP.forEach(e=>{const x=byType[e.type]||(byType[e.type]={kcal:0,n:0,std:0}); x.kcal+=e.kcal;x.n++;x.std+=e.std;});
+    return {inP,kcal,std,count:inP.length,nights:nights.size,elapsed,dry:Math.max(0,elapsed-nights.size),heavy,byType};
+  }
+
+  // ---------- render ----------
+  function render(){ applyScheme(); renderTonight(); renderRollup(); }
+
+  function renderTonight(){
+    const k=keyOf(Date.now());
+    const es=[...S.entries.values()].filter(e=>keyOf(e.ts)===k);
+    const kcal=es.reduce((s,e)=>s+e.kcal,0), std=es.reduce((s,e)=>s+e.std,0);
+    $('tKcal').textContent=fmt(kcal);
+    const td=tdee().tdee;
+    const chips=[`<span class="chip num">${es.length} drink${es.length===1?'':'s'}</span>`,
+      `<span class="chip num${std>4.05?' hot':''}">${fmt1(std)} std drink${std===1?'':'s'}</span>`];
+    if (kcal) chips.push(`<span class="chip num">${Math.round(kcal/td*100)}% of your day</span>`);
+    $('tChips').innerHTML=chips.join('');
+    $('tEquiv').textContent = kcal ? equiv(kcal) : 'Nothing on the tab yet. Tap a pour below when the first one lands.';
+  }
+
+  function renderRollup(){
+    document.querySelectorAll('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===S.view));
+    document.querySelectorAll('#metricSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===S.metric));
+    const p=period(), a=aggregate(p);
+    $('pLabel').textContent=p.label;
+    $('prev').disabled = S.view==='all';
+    $('next').disabled = S.view==='all' || S.offset>=0;
+    const td=tdee().tdee;
+    const share = a.elapsed ? a.kcal/(td*a.elapsed)*100 : 0;
+    const weekFlag = S.view==='week' && a.std>14.05;
+    $('stats').innerHTML = [
+      [fmt(a.kcal),'kcal from drinks'],
+      [fmt1(a.std),'standard drinks',weekFlag],
+      [String(a.count),'drinks logged'],
+      [`${a.nights}`,`drinking night${a.nights===1?'':'s'}`],
+      [`${a.dry}`,`dry night${a.dry===1?'':'s'}`],
+      [a.nights?fmt(a.kcal/a.nights):'0','kcal per night out'],
+    ].map(([v,l,f])=>`<div class="stat${f?' flag':''}"><b class="num">${v}</b><span>${l}</span></div>`).join('');
+
+    const notes=[];
+    if (a.kcal) notes.push(`That's <b>${fmt1(share)}%</b> of your calories over ${a.elapsed} day${a.elapsed===1?'':'s'}, or about <b>${fmt1(a.kcal/3500)} lb</b> worth by the rough 3,500-kcal rule.`);
+    if (S.view==='week') notes.push(`NIAAA's low-risk line for men is 14 standard drinks a week and no more than 4 in a day. You're at <b>${fmt1(a.std)}</b>${a.heavy?`, with ${a.heavy} night${a.heavy===1?'':'s'} over 4`:''}.`);
+    else if (a.heavy) notes.push(`${a.heavy} night${a.heavy===1?'':'s'} went past 4 standard drinks.`);
+    $('pNote').innerHTML = notes.join(' ') || 'No drinks logged in this stretch.';
+
+    $('chartLabel').textContent = S.metric==='kcal' ? `Calories by ${p.unit==='day'?'night':'month'} vs. your ${fmt(tdee().tdee)} kcal day` : `Standard drinks by ${p.unit==='day'?'night':'month'}`;
+    drawChart(p);
+    $('legend').innerHTML = p.unit==='day' ? `<span><i></i>Over 4 standard drinks</span>` : '';
+    drawMix(a);
+    drawLog(a);
+  }
+
+  function niceMax(v){ if (v<=0) return S.metric==='kcal'?500:S.metric==='pct'?20:4; const e=Math.pow(10,Math.floor(Math.log10(v))); const f=v/e; return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*e; }
+  function drawChart(p){
+    const B=p.buckets, n=B.length, slot = n>12 ? 14 : n>7 ? 26 : 44;
+    const L=38, R=6, T=12, H=150, Bot=22, W=Math.max(320, L+R+n*slot);
+    const td=tdee().tdee;
+    // kcal view: the top of the chart is your full estimated burn for a night (or a whole month)
+    const cap = p.unit==='day' ? td : td*Math.max(...B.map(b=>Math.round((b.to-b.from)/864e5)));
+    const vals=B.map(b=>S.metric==='kcal'?b.kcal:b.std);
+    const max = S.metric==='kcal' ? Math.max(cap, ...vals) : niceMax(Math.max(...vals));
+    const y=v=>T+(H-T-Bot)*(1-v/max), bw=Math.max(4,slot*0.62);
+    let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${S.metric} by ${p.unit}" style="min-width:${W>360?W+'px':'0'}">`;
+    if (S.metric==='kcal'){
+      [0,.25,.5,.75,1].forEach(f=>{const v=cap*f, yy=y(v); s+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-width="1" ${f?'stroke-dasharray="3 4"':''}/>`;
+        if (f===0||f===.5||f===1) s+=`<text x="${L-6}" y="${yy+4}" text-anchor="end" font-size="10" fill="var(--muted)" font-family="var(--body)">${fmt(v)}</text>`;});
+      s+=`<text x="${W-R}" y="${y(cap)-3}" text-anchor="end" font-size="10" font-weight="700" fill="var(--muted)" font-family="var(--body)">${p.unit==='day'?'your full day':'a full month'}</text>`;
+    } else {
+      [0,.5,1].forEach(f=>{const v=max*f, yy=y(v); s+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-width="1" ${f?'stroke-dasharray="3 4"':''}/>`+
+        `<text x="${L-6}" y="${yy+4}" text-anchor="end" font-size="10" fill="var(--muted)" font-family="var(--body)">${fmt1(v)}</text>`;});
+    }
+    if (S.metric==='std' && p.unit==='day' && max>=4){ const yy=y(4); s+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="var(--warn)" stroke-width="1.2" stroke-dasharray="5 4"/>`; }
+    B.forEach((b,i)=>{
+      const v=vals[i], cx=L+slot*i+slot/2, top=y(v), h=Math.max(0,(H-Bot)-top);
+      const fill = b.isNow ? 'var(--accent)' : 'var(--c-vodka)';
+      if (v>0) s+=`<rect x="${cx-bw/2}" y="${top}" width="${bw}" height="${h}" rx="${Math.min(5,bw/2)}" fill="${fill}"><title>${fmt(b.kcal)} kcal (${b.days?fmt1(b.kcal/(td*b.days)*100):0}% of ${p.unit==='day'?'your day':'the month'}) · ${fmt1(b.std)} std</title></rect>`;
+      else if (!b.future) s+=`<rect x="${cx-bw/2}" y="${H-Bot-2}" width="${bw}" height="2" rx="1" fill="var(--line)"/>`;
+      if (b.peak) s+=`<circle cx="${cx}" cy="${top-6}" r="3.2" fill="var(--warn)"/>`;
+      if (b.tick) s+=`<text x="${cx}" y="${H-6}" text-anchor="middle" font-size="10" font-weight="${b.isNow?700:500}" fill="${b.isNow?'var(--ink)':'var(--muted)'}" font-family="var(--body)">${b.tick}</text>`;
+    });
+    $('chart').innerHTML = s+'</svg>';
+    if (S.view==='all') $('chart').scrollLeft = 1e5;
+  }
+
+  function drawMix(a){
+    const rows=Object.entries(a.byType).sort((x,y)=>y[1].kcal-x[1].kcal);
+    if (!rows.length){ $('mix').innerHTML='<div class="empty" style="padding:10px">Nothing poured in this stretch.</div>'; return; }
+    const max=rows[0][1].kcal;
+    $('mix').innerHTML=rows.map(([t,x])=>`<div class="mix-row"><span>${esc(DRINKS[t]?DRINKS[t].name:t)}</span><span class="bar"><i style="width:${x.kcal/max*100}%;background:${DRINKS[t]?DRINKS[t].color:'var(--muted)'}"></i></span><span class="v num">${fmt(x.kcal)} kcal · ${x.n}</span></div>`).join('');
+  }
+
+  function nightName(k){
+    const d=dateFromKey(k), t=tonightDate(), diff=Math.round((t-d)/864e5);
+    if (diff===0) return 'Tonight'; if (diff===1) return 'Last night';
+    return `${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]} ${MON[d.getMonth()]} ${d.getDate()}${d.getFullYear()!==t.getFullYear()?', '+d.getFullYear():''}`;
+  }
+  let armed=null;
+  function drawLog(a){
+    $('logCount').textContent = a.count ? `${a.count} in ${S.view==='all'?'total':'this '+S.view}` : '';
+    if (!a.count){ $('log').innerHTML=`<div class="empty"><b>Clean slate</b>Drinks you log in this ${S.view==='all'?'tracker':S.view} show up here, grouped by night.</div>`; return; }
+    const groups=new Map();
+    a.inP.sort((x,y)=>y.ts-x.ts).forEach(e=>{const k=keyOf(e.ts); if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(e);});
+    let h='';
+    for (const [k,es] of groups){
+      const kc=es.reduce((s,e)=>s+e.kcal,0), sd=es.reduce((s,e)=>s+e.std,0);
+      h+=`<div class="night"><div class="night-h"><span>${nightName(k)}</span><span class="num">${fmt(kc)} kcal · ${fmt1(sd)} std</span></div>`;
+      es.forEach(e=>{const tm=new Date(e.ts).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+        h+=`<div class="entry"><span class="dot" style="background:${DRINKS[e.type]?DRINKS[e.type].color:'var(--muted)'}"></span><div class="e-main"><b>${esc(e.label)}</b><span>${tm}</span></div><span class="e-k num">${fmt(e.kcal)}</span><button class="del${armed===e.id?' armed':''}" data-del="${esc(e.id)}" aria-label="Delete ${esc(e.label)}">${armed===e.id?'Delete':'✕'}</button></div>`;});
+      h+='</div>';
+    }
+    $('log').innerHTML=h;
+  }
+
+  function buildPours(){
+    $('pours').innerHTML = Object.entries(DRINKS).map(([t,d])=>`
+      <div class="drink${d.wide?' wide':''}" data-t="${t}">
+        <div class="d-head">${ICONS[d.icon](d.color)}<div><div class="d-name">${d.name}</div><div class="d-sub">${d.sub}</div></div></div>
+        <div class="opts">${Object.entries(d.opts).map(([o,x])=>`<button class="pour" data-t="${t}" data-o="${o}"><b>${x.label}</b><span>${x.detail}</span><span class="k num">${x.kcal} kcal · ${fmt1(x.std)} std</span></button>`).join('')}</div>
+      </div>`).join('');
+    $('refTable').innerHTML = Object.values(DRINKS).flatMap(d=>Object.values(d.opts).map(o=>`<tr><td>${d.name}${Object.keys(d.opts).length>1?' · '+o.label+' ('+o.detail+')':''}</td><td>${o.kcal} kcal · ${fmt1(o.std)} std</td></tr>`)).join('');
+  }
+
+  function renderTdee(){
+    const {bmr,tdee:t}=tdee();
+    $('tdeeOut').innerHTML = `Estimated burn: <b>${fmt(t)} kcal/day</b> (resting ${fmt(bmr)}, Mifflin–St Jeor). The "% of your day" figures use this number.`;
+  }
+
+  // ---------- toast ----------
+  let toastT=null, undoId=null;
+  function toast(msg,id){
+    $('toastMsg').textContent=msg; undoId=id||null; $('toastUndo').hidden=!id;
+    $('toast').hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>{$('toast').hidden=true;},4200);
+  }
+  $('toastUndo').onclick=()=>{ if(undoId) removeEntry(undoId); $('toast').hidden=true; };
+
+  // ---------- events ----------
+  $('pours').addEventListener('click',e=>{const b=e.target.closest('.pour'); if(b) addEntry(b.dataset.t,b.dataset.o);});
+  $('viewSeg').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; S.view=b.dataset.v; S.offset=0; armed=null; renderRollup();});
+  $('metricSeg').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; S.metric=b.dataset.m; renderRollup();});
+  $('prev').onclick=()=>{S.offset--; armed=null; renderRollup();};
+  $('next').onclick=()=>{if(S.offset<0){S.offset++; armed=null; renderRollup();}};
+  $('log').addEventListener('click',e=>{const b=e.target.closest('[data-del]'); if(!b) return;
+    const id=b.dataset.del; if(armed===id){armed=null; removeEntry(id);} else {armed=id; renderRollup();}});
+
+  const localInputValue = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  function syncWhen(){
+    const btn=$('whenBtn');
+    if (S.when){ const d=new Date(S.when); btn.textContent=`Logging: ${nightName(keyOf(S.when))}, ${d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`; btn.classList.add('past'); }
+    else { btn.textContent = $('whenBox').hidden ? 'Logging: now · change' : 'Logging: now'; btn.classList.remove('past'); }
+  }
+  $('whenBtn').onclick=()=>{ const box=$('whenBox'); box.hidden=!box.hidden; if(!box.hidden) $('whenInput').value=localInputValue(new Date(S.when||Date.now())); syncWhen(); };
+  $('whenInput').onchange=e=>{ const v=e.target.value; if(!v){S.when=null;} else { const t=new Date(v).getTime(); S.when = Math.abs(t-Date.now())<60e3 ? null : t; } syncWhen(); };
+  $('whenNow').onclick=()=>{ S.when=null; $('whenBox').hidden=true; syncWhen(); };
+
+  const sheet=$('sheet');
+  $('openSettings').onclick=()=>{ renderBackup(); $('sHeight').value=S.settings.height; $('sWeight').value=S.settings.weight; $('sAge').value=S.settings.age; $('sAct').value=String(S.settings.act); renderTdee(); sheet.hidden=false; $('sHeight').focus(); };
+  $('closeSettings').onclick=()=>{ sheet.hidden=true; };
+  sheet.addEventListener('click',e=>{ if(e.target===sheet) sheet.hidden=true; });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') sheet.hidden=true; });
+  [['sHeight','height'],['sWeight','weight'],['sAge','age']].forEach(([id,k])=>$(id).addEventListener('change',e=>{const v=parseFloat(e.target.value); if(v>0){S.settings[k]=v; saveSettings();}}));
+  $('sAct').addEventListener('change',e=>{S.settings.act=parseFloat(e.target.value); saveSettings();});
+
+  $('schemes').innerHTML = Object.entries(SCHEMES).map(([k,s])=>`<button class="scheme" data-s="${k}" style="background:${s.sw[0]};color:${s.sw[1]}"><span class="sw">${s.sw.map(c=>`<i style="background:${c}"></i>`).join('')}</span><b>${s.name}</b><small>${s.note}</small></button>`).join('');
+  $('schemes').addEventListener('click',e=>{const b=e.target.closest('.scheme'); if(!b) return; S.settings.scheme=b.dataset.s; saveSettings();});
+
+
+  // ---------- backup ----------
+  function renderBackup(){
+    const last = ls.get('lc_lastBackup');
+    const n = S.entries.size;
+    $('backupInfo').innerHTML = `${n} drink${n===1?'':'s'} on this phone. ` + (last ? `Last export: <b>${new Date(last).toLocaleDateString([], {month:'short',day:'numeric',year:'numeric'})}</b>.` : 'No export yet.');
+  }
+  async function exportData(){
+    const data = JSON.stringify({app:'last-call',version:1,exported:new Date().toISOString(),entries:[...S.entries.values()],settings:S.settings});
+    const name = `last-call-backup-${keyOfDate(new Date())}.json`;
+    const file = new File([data], name, {type:'application/json'});
+    const done = () => { ls.set('lc_lastBackup', Date.now()); renderBackup(); };
+    if (navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file], title:'Last Call backup'}); done(); return; }
+      catch(e){ if (e && e.name==='AbortError') return; }
+    }
+    const a=document.createElement('a'); a.href=URL.createObjectURL(file); a.download=name;
+    document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},1500); done();
+  }
+  $('exportBtn').onclick = exportData;
+  $('importBtn').onclick = () => $('importFile').click();
+  $('importFile').onchange = e => {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try{
+        const d = JSON.parse(r.result);
+        if (!d || !Array.isArray(d.entries)) throw new Error('bad');
+        let added = 0;
+        d.entries.forEach(x => { if (x && x.id && x.type && typeof x.ts==='number' && !S.entries.has(x.id)){ S.entries.set(x.id, x); added++; } });
+        if (d.settings) S.settings = {...S.settings, ...d.settings};
+        persistLocal(); render(); renderBackup();
+        toast(added ? `Imported ${added} drink${added===1?'':'s'}` : 'Nothing new in that backup');
+      }catch{ toast('That file isn’t a Last Call backup. Pick a file ending in .json from Export.'); }
+      e.target.value='';
+    };
+    r.readAsText(f);
+  };
+
+  // bubbles
+  $('bubbles').innerHTML=[...Array(9)].map((_,i)=>{const s=6+((i*7)%12); return `<i style="left:${8+i*10.5}%;width:${s}px;height:${s}px;animation-duration:${5+(i%4)*1.7}s;animation-delay:${-i*1.3}s"></i>`;}).join('');
+
+  // refresh "tonight" when the app comes back to the foreground
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) render(); });
+
+  buildPours(); syncWhen(); goLocal(); renderBackup();
+  try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch{}
+})();
+</script>
+</body>
+</html>
